@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="refresh" content="60" >
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js'></script>
+<script type='text/javascript' src="xml2json.js"></script>
+
+<script type='text/javascript'>
+$(window).load(function(){
+
+	
+	
+	String.prototype.toHHMMSS = function() {
+	  var hours = Math.floor(this / 3600) < 10 ? ("00" + Math.floor(this / 3600)).slice(-2) : Math.floor(this / 3600);
+	  var minutes = ("00" + Math.floor((this % 3600) / 60)).slice(-2);
+	  
+	  return hours + ":" + minutes;
+	}
+	
+	String.prototype.toMinutes = function() {
+	
+		return (this >= 60? (Math.floor(this / 60)):0);
+	  
+	}
+	
+	//ATH
+	$.ajax({
+        type: "GET",
+        url: "https://api.irail.be/connections/?from=Nivelles&to=Ath",
+        dataType: "xml",
+        success: function(xmlDoc) {
+            var x2js = new X2JS();
+            var jsonObj = x2js.xml2json(xmlDoc);
+			
+			//console.log(jsonObj);
+			
+			var str_table="";
+			
+			
+			
+			for(var i=0;i<3;i++){
+			
+				var duration = jsonObj.connections.connection[i].duration;
+				var delay = jsonObj.connections.connection[i].departure["_delay"];
+				var departure=jsonObj.connections.connection[i].departure.time["_formatted"].substring(11, 16);
+				
+				str_table+="<tr>";
+				str_table+="<td>"+departure+"</td>";
+				str_table+="<td>"+duration.toHHMMSS()+"</td>";
+				str_table+="<td>"+delay.toMinutes()+"</td>";
+				str_table+="</tr>";
+				//console.log(departure);
+				
+				//console.log(duration.toHHMMSS());
+				//console.log(delay.toMinutes());
+				
+			}
+			
+			
+			$("#ath").html(str_table);
+        }
+    });
+	
+	
+	//YVOIR
+	$.ajax({
+        type: "GET",
+        url: "https://api.irail.be/connections/?from=Nivelles&to=Yvoir",
+        dataType: "xml",
+        success: function(xmlDoc) {
+            var x2js = new X2JS();
+            var jsonObj = x2js.xml2json(xmlDoc);
+			
+			//console.log(jsonObj);
+			
+			var str_table="";
+			
+			
+			
+			for(var i=0;i<3;i++){
+			
+				var duration = jsonObj.connections.connection[i].duration;
+				var delay = jsonObj.connections.connection[i].departure["_delay"];
+				var departure=jsonObj.connections.connection[i].departure.time["_formatted"].substring(11, 16);
+				
+				str_table+="<tr>";
+				str_table+="<td>"+departure+"</td>";
+				str_table+="<td>"+duration.toHHMMSS()+"</td>";
+				str_table+="<td>"+delay.toMinutes()+"</td>";
+				str_table+="</tr>";
+				
+				
+			}
+			
+			
+			$("#yvoir").html(str_table);
+        }
+    });
+	
+});
+</script>
+</head>
+<body>
+    <h1 align="center">RAIL DEMO</h1>
+	<div class="container">
+		<div class="row">
+		
+			<div class="col-sm-6 col-xs-12">
+			  <h2>Nivelles/Ath</h2>
+						 
+			  <table  class="table table-striped">
+				<thead>
+				  <tr>
+					<th>Departure</th>
+					<th>Duration</th>
+					<th>Delay</th>
+				  </tr>
+				</thead>
+				<tbody id="ath">
+				  
+				  
+				</tbody>
+			  </table>
+			</div>
+			
+			
+			<div class="col-sm-6 col-xs-12">
+			  <h2>Nivelles/Yvoir</h2>
+						 
+			  <table class="table table-striped">
+				<thead>
+				  <tr>
+					<th>Departure</th>
+					<th>Duration</th>
+					<th>Delay</th>
+				  </tr>
+				</thead>
+				<tbody id="yvoir">
+				  
+				  
+				</tbody>
+			  </table>
+			</div>
+
+		</div>
+	</div>
+
+	
+	
+</body>
+</html>

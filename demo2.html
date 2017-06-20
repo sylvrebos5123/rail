@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+    <html>
+        <head>
+			<meta http-equiv="refresh" content="60" >
+			<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+            <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.14/angular.min.js"></script>
+            <script type='text/javascript' src="xml2json.js"></script>
+            <meta charset="utf-8">
+            <title>RAIL DEMO</title> 
+        </head>
+        <body ng-app="myApp">
+        
+        
+    <div ng-controller="myCtrl">
+		
+		
+		<div class="container">
+		
+			<h1 class="jumbotron" align="center">RAIL DEMO<br><small>{{currentDate}}</small></h1>
+			<div class="row">
+			
+				<div class="col-sm-6 col-xs-12">
+				  <h2>Nivelles/Ath</h2>
+							 
+				  <table  class="table table-striped">
+					<thead>
+					  <tr>
+						<th>Departure</th>
+						<th>Duration</th>
+						<th>Delay</th>
+					  </tr>
+					</thead>
+					<tbody>
+					  <tr ng-repeat="listA in listAth">
+						<td>{{listA.departure}}</td>
+						<td>{{listA.duration}}</td>
+						<td>{{listA.delay}}</td>
+					  </tr>
+					  
+					</tbody>
+				  </table>
+				</div>
+				
+				
+				<div class="col-sm-6 col-xs-12">
+				  <h2>Nivelles/Yvoir</h2>
+							 
+				  <table class="table table-striped">
+					<thead>
+					  <tr>
+						<th>Departure</th>
+						<th>Duration</th>
+						<th>Delay</th>
+					  </tr>
+					</thead>
+					<tbody>
+					  <tr ng-repeat="listY in listYvoir">
+						<td>{{listY.departure}}</td>
+						<td>{{listY.duration}}</td>
+						<td>{{listY.delay}}</td>
+					  </tr>
+					  
+					</tbody>
+				  </table>
+				</div>
+
+			</div>
+		</div>
+		
+	</div>
+        <script>
+        var myApp = angular.module('myApp',[]);
+        
+        myApp.factory('myFactory',function($http){
+          var factory = [];
+          
+          factory.getAth = function(){
+            return $http.get("https://api.irail.be/connections/?from=Nivelles&to=Ath");
+          }
+		  
+		  factory.getYvoir = function(){
+            return $http.get("https://api.irail.be/connections/?from=Nivelles&to=Yvoir");
+          }
+        
+            return factory;
+        });
+		
+		
+        
+        myApp.controller('myCtrl',function($scope,myFactory){
+		
+		  var date=new Date();
+		  
+		  $scope.currentDate=date.getDate()+'/'+(date.getMonth()+1)+'/'+date.getFullYear()+' - '+date.getHours()+':'+date.getMinutes();
+          
+          $scope.listAth = [];
+          loadAth();
+		  $scope.listYvoir = [];
+		  loadYvoir();
+		  
+		  String.prototype.toHHMMSS = function() {
+			  var hours = Math.floor(this / 3600) < 10 ? ("00" + Math.floor(this / 3600)).slice(-2) : Math.floor(this / 3600);
+			  var minutes = ("00" + Math.floor((this % 3600) / 60)).slice(-2);
+			  
+			  return hours + ":" + minutes;
+			}
+			
+			String.prototype.toMinutes = function() {
+			
+				return (this >= 60? (Math.floor(this / 60)):0);
+			  
+			}
+          
+			function loadAth(){
+				var x2js = new X2JS();
+				myFactory.getAth().success(function(data){
+					var jsonObj  = x2js.xml_str2json(data);
+					
+					for(var i=0;i<3;i++){
+						
+						$scope.listAth.push({"duration" : jsonObj.connections.connection[i].duration.toHHMMSS()
+											, "departure" : jsonObj.connections.connection[i].departure.time["_formatted"].substring(11, 16)
+											, "delay" : jsonObj.connections.connection[i].departure["_delay"].toMinutes()});
+						
+						
+					}
+				});
+            }
+			
+			function loadYvoir(){
+				var x2js = new X2JS();
+				myFactory.getYvoir().success(function(data){
+					var jsonObj  = x2js.xml_str2json(data);
+					
+					for(var i=0;i<3;i++){
+						
+						$scope.listYvoir.push({"duration" : jsonObj.connections.connection[i].duration.toHHMMSS()
+											, "departure" : jsonObj.connections.connection[i].departure.time["_formatted"].substring(11, 16)
+											, "delay" : jsonObj.connections.connection[i].departure["_delay"].toMinutes()});
+						
+						
+					}
+				});
+            }
+			
+			
+        });
+</script> 
+</body>
+</html>
